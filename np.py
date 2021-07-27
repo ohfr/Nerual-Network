@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import numpy as np
 
 def create_weights_matrix(numRows, numCols):
@@ -8,20 +9,43 @@ def create_weights_matrix(numRows, numCols):
         size=(numRows, numCols)
     )
 
+class ActivationFunction:
+    @abstractmethod
+    def f(x):
+        pass
+
+    @abstractmethod
+    def d(x):
+        pass
+
+class LeakyRelu(ActivationFunction):
+    def __init__(self, alpha):
+        self.alpha = alpha
+    def f(self, x):
+        return np.maximum(self.alpha*x, x)
+    
+    def d(self, x):
+        return np.maximum(self.alpha, x > 0)
+
+class LossFunction:
+    @abstractmethod
+    def loss(self, ouputs, targets):
+        pass
+
+    @abstractmethod
+    def dloss(self, outputs, targets):
+        pass
+
+class MSE(LossFunction):
+    def loss(self, outputs, targets):
+        return np.mean(np.power(outputs - targets, 2))
+
+    def dloss(self, outputs, targets):
+        return 2 * (outputs - targets) / outputs.size
+
+
 def create_bias_vector(length):
     return create_weights_matrix(length, 1)
-
-def leaky_relu(x, alpha=0.1):
-    return np.maximum(alpha*x, x)
-
-def dleaky_relu(x, alpha=0.1):
-    return np.maximum(alpha, x > 0)
-
-def mean_squared_erorr(outputs, targets):
-    return np.mean(np.power(outputs - targets, 2))
-
-def dmean_squared_erorr(outputs, targets):
-    return 2 * (outputs - targets) / outputs.size
 
 class Layer:
     """
@@ -30,7 +54,7 @@ class Layer:
     def __init__(self, inputs, outputs, act_func):
         self.W = create_weights_matrix(outputs, inputs)
         self.b = create_bias_vector(outputs)
-        self.f = act_func
+        self.f = act_func.f
 
     def forward_pass(self, x):
         return self.f(np.dot(self.W, x) + self.b)
@@ -50,9 +74,9 @@ class Network:
 
 if __name__ == '__main__':
     layers = [
-        Layer(3, 7, leaky_relu),
-        Layer(7, 6, leaky_relu),
-        Layer(6, 2, leaky_relu)
+        Layer(3, 7, LeakyRelu(0.1)),
+        Layer(7, 6, LeakyRelu(0.1)),
+        Layer(6, 2, LeakyRelu(0.1))
     ]
 
     net = Network(layers)
