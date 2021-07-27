@@ -15,9 +15,9 @@ class Layer:
     """
         This class is representing the connections between 2 layers of neurons
     """
-    def __init__(self, W, b):
-        self.W = W
-        self.b = b
+    def __init__(self, inputs, outputs):
+        self.W = create_weights_matrix(outputs, inputs)
+        self.b = create_bias_vector(outputs)
 
     def forward_pass(self, x):
         return np.dot(self.W * x) + self.b
