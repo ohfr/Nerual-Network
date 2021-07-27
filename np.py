@@ -15,7 +15,7 @@ def leaky_relu(x, alpha=0.1):
     return np.maximum(alpha*x, x)
 
 def mean_squared_erorr(outputs, targets):
-    np.mean(np.power(outputs - targets, 2))
+    return np.mean(np.power(outputs - targets, 2))
 
 class Layer:
     """
