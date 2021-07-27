@@ -3,8 +3,13 @@ import numpy as np
 def create_weights_matrix(numRows, numCols):
     """Genreate normally distributed random numbers"""
     return np.random.default_rng().normal(
-        
+        loc=0,
+        scale=1/(numRows*numCols),
+        size=(numRows, numCols)
     )
+
+def create_bias_vector(length):
+    return create_weights_matrix(length, 1)
 
 class Layer:
     """
