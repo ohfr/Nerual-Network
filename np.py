@@ -27,7 +27,7 @@ class LeakyRelu(ActivationFunction):
     def f(self, x):
         return np.maximum(self.alpha*x, x)
     
-    def d(self, x):
+    def df(self, x):
         return np.maximum(self.alpha, x > 0)
 
 class LossFunction:
@@ -54,6 +54,7 @@ class Layer:
         self.W = create_weights_matrix(outputs, inputs)
         self.b = create_bias_vector(outputs)
         self.f = act_func.f
+        self.act_func = act_func
 
     def forward_pass(self, x):
         return self.f(np.dot(self.W, x) + self.b)
@@ -61,8 +62,9 @@ class Layer:
 class Network:
     """Class representing a sequence of compatible layers"""
 
-    def __init__(self, layers, loss_func):
+    def __init__(self, layers, lr, loss_func):
         self.layers = layers
+        self.lr = lr
         self.loss_func = loss_func
 
     def forward_pass(self, x):
@@ -83,20 +85,41 @@ class Network:
 
         # zip allows to loop 2 iterables at once
         for layer, x in zip(self.layers[::-1], xs[::-1]):
-            db = dx * layer.act_func.df(np.dot(layer.w, x) + layer.b)
-            dx = np.dot(layer.w.T, db)
+            db = dx * layer.act_func.df(np.dot(layer.W, x) + layer.b)
+            dx = np.dot(layer.W.T, db)
             dw = np.dot(db, x.T)
-            layer.w -= 0.001 * dw
+            layer.W -= 0.001 * dw
             layer.b -= 0.001 * db
+
+    def loss(self, x, target):
+        return self.loss_func.loss(self.forward_pass(x), target)
         
 
 if __name__ == '__main__':
     layers = [
         Layer(3, 7, LeakyRelu(0.1)),
         Layer(7, 6, LeakyRelu(0.1)),
-        Layer(6, 2, LeakyRelu(0.1))
+        Layer(6, 1, LeakyRelu(0.1))
     ]
 
-    net = Network(layers)
+    target = np.array([[0]])
 
-    print(net.forward_pass(np.array([1, 2, 3]).reshape((3, 1))))
+    net = Network(layers, 0.001, MSE())
+
+    inputs = [
+        create_bias_vector(3) for _ in range(1000)
+    ]
+    # Test network before training it
+    loss = 0
+    for input in inputs:
+        loss += net.loss(input, target)
+    print(loss)
+
+    for _ in range(10000):
+        x = create_bias_vector(3)
+        net.train(x, target)
+        
+    loss = 0
+    for input in inputs:
+        loss += net.loss(input, target)
+    print(loss)
