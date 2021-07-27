@@ -14,8 +14,14 @@ def create_bias_vector(length):
 def leaky_relu(x, alpha=0.1):
     return np.maximum(alpha*x, x)
 
+def dleaky_relu(x, alpha=0.1):
+    return np.maximum(alpha, x > 0)
+
 def mean_squared_erorr(outputs, targets):
     return np.mean(np.power(outputs - targets, 2))
+
+def dmean_squared_erorr(outputs, targets):
+    return 2 * (outputs - targets) / outputs.size
 
 class Layer:
     """
