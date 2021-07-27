@@ -20,5 +20,21 @@ class Layer:
         self.b = create_bias_vector(outputs)
 
     def forward_pass(self, x):
-        return np.dot(self.W * x) + self.b
+        return np.dot(self.W, x) + self.b
 
+class Network:
+    """Class representing a sequence of compatible layers"""
+
+    def __init__(self, layers):
+        self.layers = layers
+
+    def forward_pass(self, x):
+        out= x
+        for layer in self.layers:
+            out = layer.forward_pass(x)
+        return out
+        
+
+if __name__ == '__main__':
+    l = Layer(3, 7)
+    print(l.forward_pass(np.array([1, 2, 3]).reshape((3,1))))
