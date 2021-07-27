@@ -88,8 +88,8 @@ class Network:
             db = dx * layer.act_func.df(np.dot(layer.W, x) + layer.b)
             dx = np.dot(layer.W.T, db)
             dw = np.dot(db, x.T)
-            layer.W -= 0.001 * dw
-            layer.b -= 0.001 * db
+            layer.W -= self.lr * dw
+            layer.b -= self.lr * db
 
     def loss(self, x, target):
         return self.loss_func.loss(self.forward_pass(x), target)
